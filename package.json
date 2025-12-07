@@ -1,0 +1,25 @@
+{
+  "name": "typeorm-to-dbml",
+  "version": "1.0.0",
+  "description": "Convert a TypeScript project using TypeORM decorators to a DBML diagram.",
+  "main": "dist/generate-dbml.js",
+  "bin": {
+    "typeorm-to-dbml": "./dist/generate-dbml.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/generate-dbml.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["typeorm", "dbml", "database", "schema", "diagram"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ts-morph": "^21.0.0",
+    "typeorm": "^0.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
