@@ -24,6 +24,18 @@ function parseArgs(): { sourceGlob: string; outputPath: string } {
 }
 
 /**
+ * Get the type name from a property
+ */
+function getPropertyTypeName(property: PropertyDeclaration): string {
+  const typeNode = property.getTypeNode();
+  if (typeNode) {
+    return typeNode.getText();
+  }
+  // Fallback to getting the type from the type system
+  return property.getType().getText();
+}
+
+/**
  * Map TypeScript types to DBML types
  */
 function mapTypeToDbml(tsType: string): string {
@@ -50,9 +62,19 @@ function getEntityName(classDecl: ClassDeclaration): string {
   const args = entityDecorator.getArguments();
   if (args.length > 0) {
     const arg = args[0];
-    const text = arg.getText().replace(/['"]/g, '');
-    if (text && text !== '{}') {
-      return text;
+    const argText = arg.getText();
+    
+    // Handle string argument: @Entity('table_name')
+    if (argText.startsWith("'") || argText.startsWith('"')) {
+      return argText.replace(/['"]/g, '');
+    }
+    
+    // Handle object argument: @Entity({ name: 'table_name' })
+    if (argText.startsWith('{')) {
+      const nameMatch = argText.match(/name\s*:\s*['"]([^'"]+)['"]/);
+      if (nameMatch) {
+        return nameMatch[1];
+      }
     }
   }
 
@@ -85,7 +107,9 @@ function isNullable(property: PropertyDeclaration): boolean {
   const args = columnDecorator.getArguments();
   if (args.length > 0) {
     const optionsText = args[0].getText();
-    return optionsText.includes('nullable:') && optionsText.includes('true');
+    // Match nullable: true specifically (with proper boundaries)
+    const nullableMatch = optionsText.match(/nullable\s*:\s*true/);
+    return nullableMatch !== null;
   }
 
   return false;
@@ -103,10 +127,14 @@ function getManyToOneTarget(property: PropertyDeclaration): string | null {
   const args = manyToOneDecorator.getArguments();
   if (args.length > 0) {
     const targetArg = args[0].getText();
-    // Handle () => Entity format
-    const match = targetArg.match(/=>\s*(\w+)/);
+    // Handle () => Entity format, including namespaced entities
+    // Matches: () => Entity, () => entities.Entity, () => module.Entity
+    const match = targetArg.match(/=>\s*([\w.]+)/);
     if (match) {
-      return match[1];
+      // Extract the last part if it's a qualified name (e.g., entities.User -> User)
+      const fullName = match[1];
+      const parts = fullName.split('.');
+      return parts[parts.length - 1];
     }
   }
 
@@ -128,7 +156,6 @@ function processEntity(
 
   for (const property of properties) {
     const propertyName = property.getName();
-    const propertyType = property.getType().getText();
 
     // Handle @PrimaryGeneratedColumn
     if (hasDecorator(property, 'PrimaryGeneratedColumn')) {
@@ -138,6 +165,7 @@ function processEntity(
 
     // Handle @Column
     if (hasDecorator(property, 'Column')) {
+      const propertyType = getPropertyTypeName(property);
       const dbmlType = mapTypeToDbml(propertyType);
       const nullable = isNullable(property);
       const nullableStr = nullable ? ' [null]' : '';
