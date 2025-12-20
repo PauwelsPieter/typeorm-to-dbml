@@ -1,19 +1,19 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { UserRole } from "./user-role";
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  uuid: string
 
-  @Column()
-  name: string;
+  @CreateDateColumn({ precision: 3 })
+  createdAt: Date
+
+  @UpdateDateColumn({ precision: 3 })
+  updatedAt: Date
 
   @Column()
   email: string;
 
-  @Column({ nullable: true })
-  bio: string;
-
-  @Column()
-  isActive: boolean;
+  @OneToMany(() => UserRole, role => role.user)
+  userRoles?: Array<Relation<UserRole>>
 }
