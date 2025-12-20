@@ -44,6 +44,24 @@ function isNullable(property: PropertyDeclaration): boolean {
   return false;
 }
 
+function getJoinColumnName(property: PropertyDeclaration): string | null {
+  const joinColumnDecorator = getDecorator(property, 'JoinColumn');
+  if (!joinColumnDecorator) {
+    return null;
+  }
+
+  const args = joinColumnDecorator.getArguments();
+  if (args.length > 0) {
+    const optionsText = args[0].getText();
+    const nameMatch = optionsText.match(/name\s*:\s*['"]([^'"]+)['"]/);
+    if (nameMatch && nameMatch[1]) {
+      return nameMatch[1];
+    }
+  }
+
+  return null;
+}
+
 function getManyToOneTarget(property: PropertyDeclaration): string | null {
   const manyToOneDecorator = getDecorator(property, 'ManyToOne');
   if (!manyToOneDecorator) {
@@ -102,10 +120,13 @@ export function processEntity(
     if (hasDecorator(property, 'ManyToOne')) {
       const targetClassName = getManyToOneTarget(property);
       if (targetClassName) {
-        const fkColumnName = property.getName() + 'Id';
-        tableDefinition += `  ${fkColumnName} integer\n`;
-        const targetEntityName = classToEntityMap.get(targetClassName) || targetClassName;
-        refs.push(`Ref: ${entityName}.${fkColumnName} > ${targetEntityName}.id`);
+        const fkColumnName =
+          getJoinColumnName(property) || `${property.getName()}_id`;
+        const targetEntityName =
+          classToEntityMap.get(targetClassName) || targetClassName;
+        refs.push(
+          `Ref: ${entityName}.${fkColumnName} > ${targetEntityName}.uuid`
+        );
       }
       continue;
     }

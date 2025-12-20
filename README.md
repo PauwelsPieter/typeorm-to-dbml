@@ -33,7 +33,8 @@ The tool supports the following TypeORM decorators:
 - **`@Entity`**: Converts to DBML table. Uses class name or decorator argument as table name.
 - **`@PrimaryGeneratedColumn`**: Converts to `[pk, increment]` in DBML. When using the `'uuid'` strategy, it will generate a `varchar [pk]` column.
 - **`@Column`**: Maps TypeScript types to DBML types (e.g., `string` → `varchar`). Supports `{ nullable: true }` option.
-- **`@ManyToOne`**: Extracts target entity and generates relationship as `Ref: > Target.id`.
+- **`@ManyToOne`**: Extracts the target entity to create a foreign key relationship.
+- **`@JoinColumn`**: Used with `@ManyToOne` to specify the foreign key column name via the `name` option.
 
 ### Type Mapping
 
