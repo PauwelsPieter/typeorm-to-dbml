@@ -79,7 +79,14 @@ export function processEntity(
     const propertyName = property.getName();
 
     if (hasDecorator(property, 'PrimaryGeneratedColumn')) {
-      tableDefinition += `  ${propertyName} integer [pk, increment]\n`;
+      const decorator = property.getDecorator('PrimaryGeneratedColumn')!;
+      const args = decorator.getArguments();
+
+      if (args.length > 0 && args[0].getText() === "'uuid'") {
+        tableDefinition += `  ${propertyName} varchar [pk]\n`;
+      } else {
+        tableDefinition += `  ${propertyName} integer [pk, increment]\n`;
+      }
       continue;
     }
 
