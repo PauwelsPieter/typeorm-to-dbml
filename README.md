@@ -12,7 +12,7 @@ npm build
 ## Usage
 
 ```bash
-node dist/generate-dbml.js <sourceGlob> [outputPath]
+npm start <sourceGlob> [outputPath]
 ```
 
 ### Parameters
@@ -23,7 +23,7 @@ node dist/generate-dbml.js <sourceGlob> [outputPath]
 ### Example
 
 ```bash
-node dist/generate-dbml.js "examples/entities/**/*.ts" "./schema.dbml"
+npm start "examples/entities/**/*.ts" "./schema.dbml"
 ```
 
 ## Features
