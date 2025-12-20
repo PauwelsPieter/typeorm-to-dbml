@@ -5,6 +5,7 @@ import {
 } from 'ts-morph';
 import { mapTypeToDbml } from '../dbml/mapper';
 import { getEntityName } from './entity';
+import { toSnakeCase } from '../helpers/to-snake-case';
 
 function getPropertyTypeName(property: PropertyDeclaration): string {
   const typeNode = property.getTypeNode();
@@ -94,7 +95,7 @@ export function processEntity(
   const refs: string[] = [];
 
   for (const property of properties) {
-    const propertyName = property.getName();
+    const propertyName = toSnakeCase(property.getName());
 
     if (hasDecorator(property, 'PrimaryGeneratedColumn')) {
       const decorator = property.getDecorator('PrimaryGeneratedColumn')!;

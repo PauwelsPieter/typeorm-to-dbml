@@ -79,7 +79,7 @@ export class Post {
 The tool generates:
 
 ```dbml
-Table User {
+Table user {
   id integer [pk, increment]
   name varchar
   bio varchar [null]
@@ -88,11 +88,11 @@ Table User {
 Table posts {
   id integer [pk, increment]
   title varchar
-  authorId integer
+  author_id integer
 }
 
-// Relationships
-Ref: posts.authorId > User.id
+// relationships
+Ref: posts.author_id > user.id
 ```
 
 ## License

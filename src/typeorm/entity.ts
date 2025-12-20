@@ -1,27 +1,26 @@
 import { ClassDeclaration } from 'ts-morph';
+import { toSnakeCase } from '../helpers/to-snake-case';
 
 export function getEntityName(classDecl: ClassDeclaration): string {
   const entityDecorator = classDecl.getDecorator('Entity');
-  if (!entityDecorator) {
-    return classDecl.getName() || 'UnknownEntity';
-  }
+  if (entityDecorator) {
+    const args = entityDecorator.getArguments();
+    if (args.length > 0) {
+      const arg = args[0];
+      const argText = arg.getText();
 
-  const args = entityDecorator.getArguments();
-  if (args.length > 0) {
-    const arg = args[0];
-    const argText = arg.getText();
+      if (argText.startsWith("'") || argText.startsWith('"')) {
+        return argText.replace(/['"]/g, '');
+      }
 
-    if (argText.startsWith("'") || argText.startsWith('"')) {
-      return argText.replace(/['"]/g, '');
-    }
-
-    if (argText.startsWith('{')) {
-      const nameMatch = argText.match(/name\s*:\s*['"]([^'"]+)['"]/);
-      if (nameMatch) {
-        return nameMatch[1];
+      if (argText.startsWith('{')) {
+        const nameMatch = argText.match(/name\s*:\s*['"]([^'"]+)['"]/);
+        if (nameMatch) {
+          return nameMatch[1];
+        }
       }
     }
   }
 
-  return classDecl.getName() || 'UnknownEntity';
+  return toSnakeCase(classDecl.getName() || 'UnknownEntity');
 }
