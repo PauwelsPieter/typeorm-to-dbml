@@ -30,10 +30,23 @@ npm start "examples/entities/**/*.ts" "./schema.dbml"
 
 The tool supports the following TypeORM decorators:
 
-- **`@Entity`**: Converts to DBML table. Uses class name or decorator argument as table name.
-- **`@PrimaryGeneratedColumn`**: Converts to `[pk, increment]` in DBML. When using the `'uuid'` strategy, it will generate a `varchar [pk]` column.
-- **`@Column`**: Maps TypeScript types to DBML types (e.g., `string` → `varchar`). Supports `{ nullable: true }` and `{ default: ... }` options. It also allows specifying the column type directly, like `@Column({ type: 'jsonb' })`.
+- **`@Entity`**: Converts to a DBML table. The table name is derived from the class name or the argument passed to the decorator.
+
+- **`@PrimaryGeneratedColumn`**: Defines the primary key column.
+
+  - By default, it creates an `integer` column with `[pk, increment]`.
+  - If the `'uuid'` strategy is used, it generates a `varchar [pk]` column.
+
+- **`@Column`**: Defines a regular table column.
+
+  - **Type Inference**: If no type is specified, it maps TypeScript types to DBML types (e.g., `string` to `varchar`).
+  - **Options**:
+    - `type`: Explicitly sets the column type (e.g., `{ type: 'jsonb' }`).
+    - `nullable`: Marks the column as nullable (e.g., `{ nullable: true }`).
+    - `default`: Sets a default value for the column (e.g., `{ default: true }`).
+
 - **`@ManyToOne`**: Extracts the target entity to create a foreign key relationship.
+
 - **`@JoinColumn`**: Used with `@ManyToOne` to specify the foreign key column name via the `name` option.
 
 ### Type Mapping (When type is not explicitly specified)
