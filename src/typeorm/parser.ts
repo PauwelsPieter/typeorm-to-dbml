@@ -29,6 +29,27 @@ function getDecorator(
   return property.getDecorator(decoratorName);
 }
 
+function getColumnTypeFromDecorator(
+  property: PropertyDeclaration
+): string | null {
+  const columnDecorator = getDecorator(property, 'Column');
+  if (!columnDecorator) {
+    return null;
+  }
+
+  const args = columnDecorator.getArguments();
+  if (args.length > 0) {
+    const optionsText = args[0].getText();
+    // Matches: type: 'varchar', type: "varchar"
+    const typeMatch = optionsText.match(/type\s*:\s*['"]([^'"]+)['"]/);
+    if (typeMatch && typeMatch[1]) {
+      return typeMatch[1];
+    }
+  }
+
+  return null;
+}
+
 function isNullable(property: PropertyDeclaration): boolean {
   const columnDecorator = getDecorator(property, 'Column');
   if (!columnDecorator) {
@@ -110,8 +131,9 @@ export function processEntity(
     }
 
     if (hasDecorator(property, 'Column')) {
+      const decoratorType = getColumnTypeFromDecorator(property);
       const propertyType = getPropertyTypeName(property);
-      const dbmlType = mapTypeToDbml(propertyType);
+      const dbmlType = decoratorType || mapTypeToDbml(propertyType);
       const nullable = isNullable(property);
       const nullableStr = nullable ? ' [null]' : '';
       tableDefinition += `  ${propertyName} ${dbmlType}${nullableStr}\n`;

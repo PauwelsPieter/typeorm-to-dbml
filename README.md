@@ -32,11 +32,11 @@ The tool supports the following TypeORM decorators:
 
 - **`@Entity`**: Converts to DBML table. Uses class name or decorator argument as table name.
 - **`@PrimaryGeneratedColumn`**: Converts to `[pk, increment]` in DBML. When using the `'uuid'` strategy, it will generate a `varchar [pk]` column.
-- **`@Column`**: Maps TypeScript types to DBML types (e.g., `string` → `varchar`). Supports `{ nullable: true }` option.
+- **`@Column`**: Maps TypeScript types to DBML types (e.g., `string` → `varchar`). Supports `{ nullable: true }` option. It also allows specifying the column type directly, like `@Column({ type: 'jsonb' })`.
 - **`@ManyToOne`**: Extracts the target entity to create a foreign key relationship.
 - **`@JoinColumn`**: Used with `@ManyToOne` to specify the foreign key column name via the `name` option.
 
-### Type Mapping
+### Type Mapping (When type is not explicitly specified)
 
 | TypeScript Type | DBML Type   |
 | --------------- | ----------- |
@@ -61,6 +61,12 @@ export class User {
 
   @Column({ nullable: true })
   bio: string;
+
+  @Column({ type: "boolean" })
+  isActive: boolean;
+
+  @Column({ type: "jsonb" })
+  customFields: object;
 }
 
 @Entity("posts")
@@ -83,12 +89,13 @@ Table user {
   id integer [pk, increment]
   name varchar
   bio varchar [null]
+  is_active boolean
+  custom_fields jsonb
 }
 
 Table posts {
   id integer [pk, increment]
   title varchar
-  author_id integer
 }
 
 // relationships

@@ -14,6 +14,12 @@ export class User {
   @Column()
   email: string;
 
+  @Column({ type: 'boolean' })
+  isActive: boolean
+
+  @Column({ type: 'jsonb' })
+  customFields: object
+
   @OneToMany(() => UserRole, role => role.user)
   userRoles?: Array<Relation<UserRole>>
 }
