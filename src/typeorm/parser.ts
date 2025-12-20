@@ -132,6 +132,27 @@ function getManyToOneTarget(property: PropertyDeclaration): string | null {
   return null;
 }
 
+function getOneToOneTarget(property: PropertyDeclaration): string | null {
+  const oneToOneDecorator = getDecorator(property, 'OneToOne');
+  if (!oneToOneDecorator) {
+    return null;
+  }
+
+  const args = oneToOneDecorator.getArguments();
+  if (args.length > 0) {
+    const targetArg = args[0].getText();
+    // Matches: () => Entity, () => entities.Entity, () => module.Entity
+    const match = targetArg.match(/=>\s*([\w.]+)/);
+    if (match) {
+      const fullName = match[1];
+      const parts = fullName.split('.');
+      return parts[parts.length - 1];
+    }
+  }
+
+  return null;
+}
+
 export function processEntity(
   classDecl: ClassDeclaration,
   classToEntityMap: Map<string, string>
@@ -183,11 +204,25 @@ export function processEntity(
       const targetClassName = getManyToOneTarget(property);
       if (targetClassName) {
         const fkColumnName =
-          getJoinColumnName(property) || `${property.getName()}_id`;
+          getJoinColumnName(property) || `${toSnakeCase(property.getName())}_id`;
         const targetEntityName =
           classToEntityMap.get(targetClassName) || targetClassName;
         refs.push(
           `Ref: ${entityName}.${fkColumnName} > ${targetEntityName}.uuid`
+        );
+      }
+      continue;
+    }
+
+    if (hasDecorator(property, 'OneToOne')) {
+      const targetClassName = getOneToOneTarget(property);
+      if (targetClassName) {
+        const fkColumnName =
+          getJoinColumnName(property) || `${property.getName()}_id`;
+        const targetEntityName =
+          classToEntityMap.get(targetClassName) || targetClassName;
+        refs.push(
+          `Ref: ${entityName}.${fkColumnName} - ${targetEntityName}.uuid`
         );
       }
       continue;

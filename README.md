@@ -47,6 +47,8 @@ The tool supports the following TypeORM decorators:
 
 - **`@ManyToOne`**: Extracts the target entity to create a foreign key relationship.
 
+- **`@OneToOne`**: Extracts the target entity to create a one-to-one relationship.
+
 - **`@JoinColumn`**: Used with `@ManyToOne` to specify the foreign key column name via the `name` option.
 
 ### Type Mapping (When type is not explicitly specified)
