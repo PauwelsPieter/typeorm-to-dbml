@@ -1,0 +1,32 @@
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
+
+export async function parseArgs(): Promise<{ sourceGlob: string; outputPath: string }> {
+  const argv = await yargs(hideBin(process.argv))
+    .command('$0 <sourceGlob> [outputPath]', 'generate DBML schema from TypeORM entities', (yargs) => {
+      return yargs
+        .positional('sourceGlob', {
+          describe: 'Glob pattern for your TypeORM entities',
+          type: 'string',
+          
+        })
+        .positional('outputPath', {
+          describe: 'Path to the output DBML file',
+          type: 'string',
+          default: './schema.dbml',
+        });
+    })
+    .help()
+    .example('$0 "src/entities/**/*.ts"', 'Generate DBML from all entities in src/entities')
+    .parse();
+
+  if (!argv.sourceGlob) {
+    console.error('Error: sourceGlob is required.');
+    process.exit(1);
+  }
+
+  return {
+    sourceGlob: argv.sourceGlob as string,
+    outputPath: argv.outputPath as string,
+  };
+}

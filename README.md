@@ -1,33 +1,99 @@
-# TypeORM to DBML Converter
+# typeorm-to-dbml
 
-A script to parse TypeScript entity files decorated with TypeORM metadata and automatically generate a Database Markup Language (DBML) schema. This allows you to easily visualize your database structure using tools like [dbdiagram.io](https://dbdiagram.io/).
+Convert a TypeScript project using TypeORM decorators to a DBML diagram.
 
-## ✨ Features
-
-The converter script uses `ts-morph` to statically analyze your code and currently supports the following TypeORM features:
-
-- **Entity Detection:** Finds classes decorated with `@Entity()`.
-- **Table Naming:** Supports both class names and explicit table names (`@Entity('users')`).
-- **Primary Keys:** Detects `@PrimaryGeneratedColumn` and maps them to `[pk, increment]`.
-- **Standard Columns:** Detects `@Column`, `@CreateDateColumn`, etc.
-- **Type Mapping:** Maps common TypeScript types (`string`, `number`, `Date`) to suitable DBML/SQL types (`varchar`, `int`, `timestamp`).
-- **Constraints:** Detects `{ nullable: true }` options and maps them to `[null]`.
-- **Basic Relations:** Detects `@ManyToOne` and generates a Foreign Key reference (`Ref: > Target.id`) based on standard TypeORM conventions.
-
-## 🛠️ Prerequisites
-
-To run this script, you need:
-
-- Node.js (v14+)
-- TypeScript
-- The `ts-node` package (for easy execution)
-- The `ts-morph` package (for AST parsing)
-
-## ⚙️ Usage
+## Installation
 
 ```bash
-ts-node generate-dbml.ts "<entity-file-glob>" "<output-path>"
-
-# Example:
-ts-node generate-dbml.ts "./src/entities/**/*.ts" "./schema.dbml"
+npm install
+npm build
 ```
+
+## Usage
+
+```bash
+npm start <sourceGlob> [outputPath]
+```
+
+### Parameters
+
+- `sourceGlob` (required): Glob pattern to match TypeORM entity files (e.g., `"src/entities/**/*.ts"`)
+- `outputPath` (optional): Path to output DBML file (default: `./schema.dbml`)
+
+### Example
+
+```bash
+npm start "examples/entities/**/*.ts" "./schema.dbml"
+```
+
+## Features
+
+The tool supports the following TypeORM decorators:
+
+- **`@Entity`**: Converts to DBML table. Uses class name or decorator argument as table name.
+- **`@PrimaryGeneratedColumn`**: Converts to `[pk, increment]` in DBML.
+- **`@Column`**: Maps TypeScript types to DBML types (e.g., `string` → `varchar`). Supports `{ nullable: true }` option.
+- **`@ManyToOne`**: Extracts target entity and generates relationship as `Ref: > Target.id`.
+
+### Type Mapping
+
+| TypeScript Type | DBML Type   |
+| --------------- | ----------- |
+| `string`        | `varchar`   |
+| `number`        | `integer`   |
+| `boolean`       | `boolean`   |
+| `Date`          | `timestamp` |
+| `any`           | `text`      |
+
+## Example Output
+
+Given TypeORM entities like:
+
+```typescript
+@Entity()
+export class User {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  name: string;
+
+  @Column({ nullable: true })
+  bio: string;
+}
+
+@Entity("posts")
+export class Post {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  title: string;
+
+  @ManyToOne(() => User)
+  author: User;
+}
+```
+
+The tool generates:
+
+```dbml
+Table User {
+  id integer [pk, increment]
+  name varchar
+  bio varchar [null]
+}
+
+Table posts {
+  id integer [pk, increment]
+  title varchar
+  authorId integer
+}
+
+// Relationships
+Ref: posts.authorId > User.id
+```
+
+## License
+
+See LICENSE file.
