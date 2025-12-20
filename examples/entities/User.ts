@@ -14,7 +14,7 @@ export class User {
   @Column()
   email: string;
 
-  @Column({ type: 'boolean' })
+  @Column({ type: 'boolean', default: true })
   isActive: boolean
 
   @Column({ type: 'jsonb' })

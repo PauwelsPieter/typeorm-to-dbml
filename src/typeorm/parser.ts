@@ -1,6 +1,8 @@
 import {
   ClassDeclaration,
   Decorator,
+  ObjectLiteralExpression,
+  PropertyAssignment,
   PropertyDeclaration,
 } from 'ts-morph';
 import { mapTypeToDbml } from '../dbml/mapper';
@@ -44,6 +46,29 @@ function getColumnTypeFromDecorator(
     const typeMatch = optionsText.match(/type\s*:\s*['"]([^'"]+)['"]/);
     if (typeMatch && typeMatch[1]) {
       return typeMatch[1];
+    }
+  }
+
+  return null;
+}
+
+function getColumnDefault(property: PropertyDeclaration): string | null {
+  const columnDecorator = getDecorator(property, 'Column');
+  if (!columnDecorator) {
+    return null;
+  }
+
+  const args = columnDecorator.getArguments();
+  if (args.length > 0) {
+    const options = args[0];
+    if (options instanceof ObjectLiteralExpression) {
+      const defaultProperty = options.getProperty('default');
+      if (
+        defaultProperty &&
+        defaultProperty instanceof PropertyAssignment
+      ) {
+        return defaultProperty.getInitializer()?.getText() || null;
+      }
     }
   }
 
@@ -135,8 +160,20 @@ export function processEntity(
       const propertyType = getPropertyTypeName(property);
       const dbmlType = decoratorType || mapTypeToDbml(propertyType);
       const nullable = isNullable(property);
-      const nullableStr = nullable ? ' [null]' : '';
-      tableDefinition += `  ${propertyName} ${dbmlType}${nullableStr}\n`;
+      const defaultValue = getColumnDefault(property);
+
+      const settings = [];
+      if (nullable) {
+        settings.push('null');
+      }
+      if (defaultValue) {
+        settings.push(`default: '${defaultValue}'`);
+      }
+
+      const settingsStr =
+        settings.length > 0 ? ` [${settings.join(', ')}]` : '';
+
+      tableDefinition += `  ${propertyName} ${dbmlType}${settingsStr}\n`;
       continue;
     }
 
