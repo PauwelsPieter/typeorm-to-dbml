@@ -31,6 +31,16 @@ function getDecorator(
   return property.getDecorator(decoratorName);
 }
 
+function getDecoratorOptions(
+  decorator: Decorator
+): ObjectLiteralExpression | undefined {
+  const args = decorator.getArguments();
+  if (args.length > 0 && args[0] instanceof ObjectLiteralExpression) {
+    return args[0];
+  }
+  return undefined;
+}
+
 function getColumnTypeFromDecorator(
   property: PropertyDeclaration
 ): string | null {
@@ -39,13 +49,11 @@ function getColumnTypeFromDecorator(
     return null;
   }
 
-  const args = columnDecorator.getArguments();
-  if (args.length > 0) {
-    const optionsText = args[0].getText();
-    // Matches: type: 'varchar', type: "varchar"
-    const typeMatch = optionsText.match(/type\s*:\s*['"]([^'"]+)['"]/);
-    if (typeMatch && typeMatch[1]) {
-      return typeMatch[1];
+  const options = getDecoratorOptions(columnDecorator);
+  if (options) {
+    const typeProperty = options.getProperty('type');
+    if (typeProperty && typeProperty instanceof PropertyAssignment) {
+      return typeProperty.getInitializer()?.getText().replace(/['"]/g, '') || null;
     }
   }
 
@@ -58,17 +66,11 @@ function getColumnDefault(property: PropertyDeclaration): string | null {
     return null;
   }
 
-  const args = columnDecorator.getArguments();
-  if (args.length > 0) {
-    const options = args[0];
-    if (options instanceof ObjectLiteralExpression) {
-      const defaultProperty = options.getProperty('default');
-      if (
-        defaultProperty &&
-        defaultProperty instanceof PropertyAssignment
-      ) {
-        return defaultProperty.getInitializer()?.getText() || null;
-      }
+  const options = getDecoratorOptions(columnDecorator);
+  if (options) {
+    const defaultProperty = options.getProperty('default');
+    if (defaultProperty && defaultProperty instanceof PropertyAssignment) {
+      return defaultProperty.getInitializer()?.getText() || null;
     }
   }
 
@@ -81,11 +83,12 @@ function isNullable(property: PropertyDeclaration): boolean {
     return false;
   }
 
-  const args = columnDecorator.getArguments();
-  if (args.length > 0) {
-    const optionsText = args[0].getText();
-    const nullableMatch = optionsText.match(/nullable\s*:\s*true/);
-    return nullableMatch !== null;
+  const options = getDecoratorOptions(columnDecorator);
+  if (options) {
+    const nullableProperty = options.getProperty('nullable');
+    if (nullableProperty && nullableProperty instanceof PropertyAssignment) {
+      return nullableProperty.getInitializer()?.getText() === 'true';
+    }
   }
 
   return false;
@@ -97,12 +100,11 @@ function getJoinColumnName(property: PropertyDeclaration): string | null {
     return null;
   }
 
-  const args = joinColumnDecorator.getArguments();
-  if (args.length > 0) {
-    const optionsText = args[0].getText();
-    const nameMatch = optionsText.match(/name\s*:\s*['"]([^'"]+)['"]/);
-    if (nameMatch && nameMatch[1]) {
-      return nameMatch[1];
+  const options = getDecoratorOptions(joinColumnDecorator);
+  if (options) {
+    const nameProperty = options.getProperty('name');
+    if (nameProperty && nameProperty instanceof PropertyAssignment) {
+      return nameProperty.getInitializer()?.getText().replace(/['"]/g, '') || null;
     }
   }
 
