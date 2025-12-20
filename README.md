@@ -6,7 +6,7 @@ Convert a TypeScript project using TypeORM decorators to a DBML diagram.
 
 ```bash
 npm install
-npm run build
+npm build
 ```
 
 ## Usage
@@ -37,13 +37,13 @@ The tool supports the following TypeORM decorators:
 
 ### Type Mapping
 
-| TypeScript Type | DBML Type |
-|----------------|-----------|
-| `string`       | `varchar` |
-| `number`       | `integer` |
-| `boolean`      | `boolean` |
-| `Date`         | `timestamp` |
-| `any`          | `text` |
+| TypeScript Type | DBML Type   |
+| --------------- | ----------- |
+| `string`        | `varchar`   |
+| `number`        | `integer`   |
+| `boolean`       | `boolean`   |
+| `Date`          | `timestamp` |
+| `any`           | `text`      |
 
 ## Example Output
 
@@ -62,7 +62,7 @@ export class User {
   bio: string;
 }
 
-@Entity('posts')
+@Entity("posts")
 export class Post {
   @PrimaryGeneratedColumn()
   id: number;
