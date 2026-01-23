@@ -49,7 +49,7 @@ function getDecoratorProperty (
   if (options) {
     const property = options.getProperty(propertyName);
     if (property && property instanceof PropertyAssignment) {
-      return property.getInitializer()?.getText() || null;
+      return property.getInitializer()?.getText().replace(/['"]/g, '') || null;
     }
   }
   return null;
