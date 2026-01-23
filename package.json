@@ -1,6 +1,6 @@
 {
   "name": "typeorm-to-dbml",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Convert a TypeScript project using TypeORM decorators to a DBML diagram.",
   "main": "dist/index.js",
   "bin": "dist/index.js",
