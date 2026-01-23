@@ -25,6 +25,14 @@ export async function parseArgs(): Promise<{ sourceGlob: string; outputPath: str
     process.exit(1);
   }
 
+  // Safety check: specific to preventing overwrites when users forget quotes around globs
+  if (argv.outputPath && String(argv.outputPath).endsWith('.ts')) {
+    console.error(`Error: outputPath '${argv.outputPath}' looks like a TypeScript file.`);
+    console.error('Did you forget to quote your glob pattern? (e.g. "src/**/*.ts")');
+    console.error('Shell expansion causes the second matched file to be treated as the outputPath.');
+    process.exit(1);
+  }
+
   return {
     sourceGlob: argv.sourceGlob as string,
     outputPath: argv.outputPath as string,
