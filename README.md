@@ -32,13 +32,14 @@ The tool supports the following TypeORM decorators:
 
 - **`@Entity`**: Converts to a DBML table. The table name is derived from the class name or the argument passed to the decorator.
 
-- **`@PrimaryGeneratedColumn`**: Defines the primary key column.
+- **`@PrimaryColumn`**: Defines a primary key column.
+  - You can specify the column type using the `type` option (e.g., `{ type: 'uuid' }`).
 
+- **`@PrimaryGeneratedColumn`**: Defines the primary key column.
   - By default, it creates an `integer` column with `[pk, increment]`.
   - If the `'uuid'` strategy is used, it generates a `varchar [pk]` column.
 
 - **`@Column`**: Defines a regular table column.
-
   - **Type Inference**: If no type is specified, it maps TypeScript types to DBML types (e.g., `string` to `varchar`).
   - **Options**:
     - `type`: Explicitly sets the column type (e.g., `{ type: 'jsonb' }`).

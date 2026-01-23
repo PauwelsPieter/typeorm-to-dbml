@@ -41,22 +41,17 @@ function getDecoratorOptions(
   return undefined;
 }
 
-function getColumnTypeFromDecorator(
-  property: PropertyDeclaration
+function getDecoratorProperty (
+  decorator: Decorator,
+  propertyName: string
 ): string | null {
-  const columnDecorator = getDecorator(property, 'Column');
-  if (!columnDecorator) {
-    return null;
-  }
-
-  const options = getDecoratorOptions(columnDecorator);
+  const options = getDecoratorOptions(decorator);
   if (options) {
-    const typeProperty = options.getProperty('type');
-    if (typeProperty && typeProperty instanceof PropertyAssignment) {
-      return typeProperty.getInitializer()?.getText().replace(/['"]/g, '') || null;
+    const property = options.getProperty(propertyName);
+    if (property && property instanceof PropertyAssignment) {
+      return property.getInitializer()?.getText() || null;
     }
   }
-
   return null;
 }
 
@@ -166,6 +161,16 @@ export function processEntity(
   for (const property of properties) {
     const propertyName = toSnakeCase(property.getName());
 
+    if (hasDecorator(property, 'PrimaryColumn')) {
+      const decorator = property.getDecorator('PrimaryColumn')!;
+      const decoratorType = getDecoratorProperty(decorator, 'type');
+      const propertyType = getPropertyTypeName(property);
+      const dbmlType = decoratorType || mapTypeToDbml(propertyType);
+
+      tableDefinition += `  ${propertyName} ${dbmlType} [pk]\n`;
+      continue;
+    }
+
     if (hasDecorator(property, 'PrimaryGeneratedColumn')) {
       const decorator = property.getDecorator('PrimaryGeneratedColumn')!;
       const args = decorator.getArguments();
@@ -179,7 +184,8 @@ export function processEntity(
     }
 
     if (hasDecorator(property, 'Column')) {
-      const decoratorType = getColumnTypeFromDecorator(property);
+      const decorator = property.getDecorator('Column')!;
+      const decoratorType = getDecoratorProperty(decorator, 'type');
       const propertyType = getPropertyTypeName(property);
       const dbmlType = decoratorType || mapTypeToDbml(propertyType);
       const nullable = isNullable(property);
