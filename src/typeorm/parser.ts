@@ -233,6 +233,21 @@ export function processEntity(
       }
       continue;
     }
+
+    if (hasDecorator(property, 'CreateDateColumn')) {
+      tableDefinition += `  ${propertyName} timestamp [default: 'now()']\n`;
+      continue;
+    }
+
+    if (hasDecorator(property, 'UpdateDateColumn')) {
+      tableDefinition += `  ${propertyName} timestamp [default: 'now()']\n`;
+      continue;
+    }
+
+    if (hasDecorator(property, 'DeleteDateColumn')) {
+      tableDefinition += `  ${propertyName} timestamp [null]\n`;
+      continue;
+    }
   }
 
   tableDefinition += `}\n`;

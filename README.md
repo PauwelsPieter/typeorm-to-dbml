@@ -52,6 +52,12 @@ The tool supports the following TypeORM decorators:
 
 - **`@JoinColumn`**: Used with `@ManyToOne` to specify the foreign key column name via the `name` option.
 
+- **`@CreatedDateColumn`**: Creates a `timestamp` column for creation date.
+
+- **`@UpdateDateColumn`**: Creates a `timestamp` column for last update date.
+
+- **`@DeleteDateColumn`**: Creates a nullable `timestamp` column for soft delete date.
+
 ### Type Mapping (When type is not explicitly specified)
 
 | TypeScript Type | DBML Type   |
