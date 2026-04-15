@@ -2,6 +2,12 @@
 
 Convert a TypeScript project using TypeORM decorators to a DBML diagram.
 
+## ARCHIVED
+
+This repository was moved to:
+- Github: https://github.com/wisemen-digital/wisemen-core
+- npm: https://www.npmjs.com/package/@wisemen/typeorm-to-dbml
+
 ## Installation
 
 ```bash
